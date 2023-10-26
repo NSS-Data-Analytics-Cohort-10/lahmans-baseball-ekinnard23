@@ -57,9 +57,39 @@ ORDER BY salaries.salary DESC
 	
 
 4. Using the fielding table, group players into three groups based on their position: label players with position OF as "Outfield", those with position "SS", "1B", "2B", and "3B" as "Infield", and those with position "P" or "C" as "Battery". Determine the number of putouts made by each of these three groups in 2016.
-   
+ 
+SELECT playerid,
+	yearid,
+	pos,
+	po,
+	CASE WHEN pos = 'OF' THEN 'OUTFIELD'
+	WHEN pos = 'SS' OR pos = '1B' OR pos = '2B' OR pos = '3B' THEN 'INFIELD'
+	WHEN pos = 'P' OR pos = 'C' THEN 'Battery' END AS position
+FROM fielding	 
+
+WITH position AS (SELECT playerid,
+	yearid,
+	pos,
+	po,
+	CASE WHEN pos = 'OF' THEN 'OUTFIELD'
+	WHEN pos = 'SS' OR pos = '1B' OR pos = '2B' OR pos = '3B' THEN 'INFIELD'
+	WHEN pos = 'P' OR pos = 'C' THEN 'Battery' END AS position
+FROM fielding)
+
+SELECT position, 
+	SUM(f.po) AS po_per_position
+FROM position
+INNER JOIN fielding AS f
+USING (playerid)
+WHERE f.yearid = 2016
+GROUP BY position
+
+--Battery 317,472 Infield 689,431 Outfield 285,322
+
+
 5. Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any trends?
-   
+
+SELECT CASE 
 
 6. Find the player who had the most success stealing bases in 2016, where __success__ is measured as the percentage of stolen base attempts which are successful. (A stolen base attempt results either in a stolen base or being caught stealing.) Consider only players who attempted _at least_ 20 stolen bases.
 	
