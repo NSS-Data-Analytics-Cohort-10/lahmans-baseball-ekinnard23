@@ -89,12 +89,63 @@ GROUP BY position
 
 5. Find the average number of strikeouts per game by decade since 1920. Round the numbers you report to 2 decimal places. Do the same for home runs per game. Do you see any trends?
 
-SELECT CASE 
+SELECT CASE WHEN RIGHT(yearid::text, 2):: integer BETWEEN 10 AND 19 THEN '2010s'
+	WHEN RIGHT(yearid::text, 2):: integer BETWEEN 20 AND 29 THEN '1920s'
+	WHEN RIGHT(yearid::text, 2):: integer BETWEEN 30 AND 39 THEN '1930s'
+	WHEN RIGHT(yearid::text, 2):: integer BETWEEN 40 AND 49 THEN '1940s'
+	WHEN RIGHT(yearid::text, 2):: integer BETWEEN 50 AND 59 THEN '1950s'
+	WHEN RIGHT(yearid::text, 2):: integer BETWEEN 60 AND 69 THEN '1960s'
+	WHEN RIGHT(yearid::text, 2):: integer BETWEEN 70 AND 79 THEN '1970s'
+	WHEN RIGHT(yearid::text, 2):: integer BETWEEN 80 AND 89 THEN '1980s'
+	WHEN RIGHT(yearid::text, 2):: integer BETWEEN 90 AND 99 THEN '1990s'
+	WHEN RIGHT(yearid::text, 2):: integer BETWEEN 00 AND 09 THEN '2000s'
+	ELSE 'ERROR' END AS decade,
+	ROUND(AVG(soa * 1.0/g), 2) AS strikeouts_per_game,
+	ROUND(AVG(HR * 1.0/g), 2) AS homeruns_per_game
+FROM teams
+WHERE yearid > 1919
+GROUP BY decade
+ORDER BY decade
+
+--Each metric has more than doubled
 
 6. Find the player who had the most success stealing bases in 2016, where __success__ is measured as the percentage of stolen base attempts which are successful. (A stolen base attempt results either in a stolen base or being caught stealing.) Consider only players who attempted _at least_ 20 stolen bases.
-	
 
-7.  From 1970 – 2016, what is the largest number of wins for a team that did not win the world series? What is the smallest number of wins for a team that did win the world series? Doing this will probably result in an unusually small number of wins for a world series champion – determine why this is the case. Then redo your query, excluding the problem year. How often from 1970 – 2016 was it the case that a team with the most wins also won the world series? What percentage of the time?
+SELECT namefirst,
+	namelast,
+	sb,
+	cs,
+	sb+cs AS sbcs,
+	ROUND((sb * 1.0/(sb+cs)) * 100, 2) AS sb_success
+FROM batting
+INNER JOIN people
+USING(playerid)
+WHERE yearid = 2016 AND sb+cs >= 20
+ORDER BY sb_success DESC
+
+--Chris Owings 91.3%
+
+7.a  From 1970 – 2016, what is the largest number of wins for a team that did not win the world series? 
+
+SELECT*
+FROM teams
+WHERE wswin = 'N'
+	AND yearid >= 1970
+ORDER BY w DESC
+
+--116
+
+7.b What is the smallest number of wins for a team that did win the world series? Doing this will probably result in an unusually small number of wins for a world series champion – determine why this is the case. 
+
+SELECT*
+FROM teams
+WHERE wswin = 'N'
+	AND yearid >= 1970
+ORDER BY w ASC
+
+--37
+
+7.c Then redo your query, excluding the problem year. How often from 1970 – 2016 was it the case that a team with the most wins also won the world series? What percentage of the time?
 
 
 8. Using the attendance figures from the homegames table, find the teams and parks which had the top 5 average attendance per game in 2016 (where average attendance is defined as total attendance divided by number of games). Only consider parks where there were at least 10 games played. Report the park name, team name, and average attendance. Repeat for the lowest 5 average attendance.
