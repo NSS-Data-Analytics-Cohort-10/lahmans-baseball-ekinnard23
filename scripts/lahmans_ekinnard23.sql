@@ -208,6 +208,36 @@ SELECT park_name,
 
 9. Which managers have won the TSN Manager of the Year award in both the National League (NL) and the American League (AL)? Give their full name and the teams that they were managing when they won the award.
 
+WITH moty AS (SELECT namefirst, 
+			  namelast,
+			  teams.name AS team_name,
+			  tsn_winners.lgid AS league,
+			  playerid
+			FROM (SELECT playerid, lgid, yearid
+				  FROM awardsmanagers
+				  WHERE awardid = 'TSN Manager of the Year' AND lgid IN ('NL', 						'AL')
+				  GROUP BY playerid, lgid, yearid) AS tsn_winners
+			  INNER JOIN people
+			  USING(playerid)
+			  INNER JOIN managers
+			  USING(playerid, yearid)
+			  INNER JOIN teams
+			  USING(teamid, yearid)),
+lgid_count AS (SELECT playerid,
+			  	CASE WHEN COUNT(DISTINCT lgid) = 2 THEN 'Y' ELSE 'N' END AS 						both_leagues
+			   FROM awardsmanagers
+			   WHERE lgid IN('NL', 'AL') AND awardid = 'TSN Manager of the Year'
+			   GROUP BY playerid)
+SELECT namefirst, namelast, team_name, league
+FROM lgid_count
+INNER JOIN moty
+USING(playerid)
+WHERE both_leagues = 'Y'
+GROUP BY namelast, namefirst, team_name, league
+
+--Davey Johnson - Baltimore Orioles and Washington Nationals
+--Jim Leyland - Detroit Tigers and Pittsburgh Pirates
+
 10. Find all players who hit their career highest number of home runs in 2016. Consider only players who have played in the league for at least 10 years, and who hit at least one home run in 2016. Report the players'0' first and last names and the number of home runs they hit in 2016.
 
 
