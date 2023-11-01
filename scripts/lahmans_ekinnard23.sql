@@ -1,9 +1,6 @@
 ### Use SQL queries to find answers to the *Initial Questions*. If time permits, choose one (or more) of the *Open-Ended Questions*. Toward the end of the bootcamp, we will revisit this data if time allows to combine SQL, Excel Power Pivot, and/or Python to answer more of the *Open-Ended Questions*.
 
 
-
-**Initial Questions**
-
 1. What range of years for baseball games played does the provided database cover? 
 
 SELECT MIN(yearid), MAX(yearid)
@@ -241,6 +238,31 @@ GROUP BY namelast, namefirst, team_name, league
 10. Find all players who hit their career highest number of home runs in 2016. Consider only players who have played in the league for at least 10 years, and who hit at least one home run in 2016. Report the players'0' first and last names and the number of home runs they hit in 2016.
 
 
+
+WITH players2016 AS (SELECT playerid, hr AS homeruns2016
+			           FROM batting
+		              WHERE yearid = 2016 AND hr >= 1), 
+
+
+	   yrsplayed AS (SELECT playerid, namefirst, namelast, (finalgame::date - debut::date)/365 AS yearsplayed
+				       FROM people), 
+
+	    careerhr AS (SELECT playerid, MAX(hr) AS careermaxhr
+				       FROM batting
+				      GROUP BY playerid) 
+
+SELECT namefirst||' '||namelast AS full_name,
+	   homeruns2016
+  FROM players2016
+	   LEFT JOIN yrsplayed
+	   USING(playerid)
+	   LEFT JOIN careerhr
+	   USING(playerid)
+ WHERE homeruns2016 = careermaxhr AND yearsplayed >=10
+ ORDER BY homeruns2016 DESC;
+ 
+ 
+ --Edwin Encarnacion 42, Robinson Cano 39, Mike Napoli 34, Rajai Davis 12, Angel Pagan 12.
 **Open-ended questions**
 
 11. Is there any correlation between number of wins and team salary? Use data from 2000 and later to answer this question. As you do this analysis, keep in mind that salaries across the whole league tend to increase together, so you may want to look on a year-by-year basis.
