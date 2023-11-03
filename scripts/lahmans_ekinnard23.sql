@@ -172,8 +172,7 @@ WITH top_2016_attendance AS (SELECT park_name,
 						USING(park)
 						WHERE games >=10 AND year = 2016
 						ORDER BY avg_attendance DESC
-						LIMIT 5)
-							
+						LIMIT 5)						
 SELECT park_name,
 	teams.name,
 	avg_attendance
@@ -242,15 +241,11 @@ GROUP BY namelast, namefirst, team_name, league
 WITH players2016 AS (SELECT playerid, hr AS homeruns2016
 			           FROM batting
 		              WHERE yearid = 2016 AND hr >= 1), 
-
-
 	   yrsplayed AS (SELECT playerid, namefirst, namelast, (finalgame::date - debut::date)/365 AS yearsplayed
 				       FROM people), 
-
 	    careerhr AS (SELECT playerid, MAX(hr) AS careermaxhr
 				       FROM batting
 				      GROUP BY playerid) 
-
 SELECT namefirst||' '||namelast AS full_name,
 	   homeruns2016
   FROM players2016
